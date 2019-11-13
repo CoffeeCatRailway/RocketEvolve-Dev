@@ -1,0 +1,62 @@
+group 'coffeecatteam.rocketevolve'
+version '0.5'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+def buildPath = "build/" + version
+buildDir = file(buildPath)
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+dependencies {
+    compile 'club.minnced:java-discord-rpc:2.0.1'
+
+    compile fileTree(dir: "libs/jars", include: "*.jar")
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    from configurations.compile.collect { zipTree it }
+    manifest {
+        attributes 'Main-Class': 'coffeecatteam.rocketevolve.Launcher'
+    }
+    exclude("META-INF/*.RSA", "META-INF/*.SF")
+}
+
+task copyOptions(type: Copy) {
+    println("Copying extra files to " + buildPath + "/libs")
+    copy {
+        from "README.md"
+        copy {
+            from  fileTree(dir: "icons", include: "*.png")
+            into buildPath + "/libs/icons"
+        }
+        copy {
+            from fileTree(dir: "libs/natives", include: "*.dll")
+            from fileTree(dir: "libs/natives", include: "*.so")
+            from fileTree(dir: "libs/natives", include: "*.dylib")
+            into buildPath + "/libs/natives"
+        }
+        into buildPath + "/libs"
+    }
+}
